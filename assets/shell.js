@@ -228,6 +228,16 @@ function askSignOut(){
   else doSignOut();
 }
 
+/* ---------- starter categories ---------- */
+// What every new account begins with. Home and the Dashboard both read this, so an
+// account that has never changed its categories still shows them by name.
+function starterSettings(){
+  const id = n => 'c-' + n.toLowerCase().replace(/[^a-z]+/g, '-');
+  const e = n => ({id:id(n), name:n, kind:'expense', budget:0});
+  const i = n => ({id:id(n), name:n, kind:'income', budget:0});
+  return {categories:[e('Housing'), e('Groceries'), e('Eating out'), e('Transportation'), e('Utilities and phone'), e('Subscriptions'), e('Business costs'), e('Fun'), e('Everything else'), i('Client work'), i('Other income')], recurring:[]};
+}
+
 /* ---------- start ---------- */
 // opts: page ('home' | 'dashboard'), onEnter(user), onLeave(), onName(name),
 //       onCategories() when this page can open the categories editor itself, hasUnsaved().
@@ -246,5 +256,5 @@ function start(o){
   });
 }
 
-window.Shell = {sb:sb, $:$, h:h, s:s, settle:settle, toast:toast, hideToast:hideToast, start:start, nameOf:nameOf, members:members, user:function(){ return user; }};
+window.Shell = {sb:sb, $:$, h:h, s:s, settle:settle, toast:toast, hideToast:hideToast, start:start, nameOf:nameOf, members:members, starterSettings:starterSettings, user:function(){ return user; }};
 })();

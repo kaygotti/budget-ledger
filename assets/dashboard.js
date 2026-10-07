@@ -37,13 +37,15 @@ let cache = {}, loading = {}, failedFor = null, lastWidth = 0;
 
 /* ---------- data ---------- */
 function parse(rows){
-  const p = {cats:[], months:{}, at:Date.now()};
+  const cats = list => (Array.isArray(list) ? list : []).filter(c => c && c.id && c.name).map(c => ({
+    id:String(c.id), name:String(c.name), kind:c.kind === 'income' ? 'income' : 'expense',
+    budget:+c.budget > 0 ? Math.round(+c.budget * 100) : 0}));
+  // Someone who has never changed their categories has none saved: they are on the starter set.
+  const p = {cats:cats(Shell.starterSettings().categories), months:{}, at:Date.now()};
   rows.forEach(function(r){
     const b = (r && r.body) || {};
     if (r.key === 'settings'){
-      p.cats = (Array.isArray(b.categories) ? b.categories : []).filter(c => c && c.id && c.name).map(c => ({
-        id:String(c.id), name:String(c.name), kind:c.kind === 'income' ? 'income' : 'expense',
-        budget:+c.budget > 0 ? Math.round(+c.budget * 100) : 0}));
+      p.cats = cats(b.categories);
     } else if (/^m-\d{4}-\d{2}$/.test(r.key)){
       p.months[r.key.slice(2)] = (Array.isArray(b.items) ? b.items : []).filter(i => i && isFinite(+i.amount)).map(i => ({
         amount:Math.round(+i.amount * 100), kind:i.kind === 'income' ? 'income' : 'expense', cat:String(i.categoryId || '')}));
@@ -365,7 +367,7 @@ function paint(){
 
   /* the same numbers as tables */
   const t1 = table(['Month', 'Money in', 'Money out', 'Left'].concat(M.budget ? ['Budgeted spending', 'Budget'] : []),
-    M.ms.map(m => { const t = M.st[m]; return [longMonth(m), money(t.inc), money(t.exp), (t.inc - t.exp < 0 ? '−' : '') + money(Math.abs(t.inc - t.exp))].concat(M.budget ? [money(M.budgeted(m)), money(M.budget)] : []); }));
+    M.ms.map(m => { const t = M.st[m]; return [shortMonth(m) + ' ' + m.slice(0, 4), money(t.inc), money(t.exp), (t.inc - t.exp < 0 ? '−' : '') + money(Math.abs(t.inc - t.exp))].concat(M.budget ? [money(M.budgeted(m)), money(M.budget)] : []); }));
   const t2 = table(['Category'].concat(M.ms.map(m => shortMonth(m) + ' ' + m.slice(2, 4)), ['Budget']),
     mrows.map(r => [r.name].concat(M.ms.map(m => money(M.st[m].by[r.key] || 0)), [r.budget ? money(r.budget) : 'None'])));
   box.append(h('section', {class:'sheet'}, h('h2', null, 'The numbers behind the charts'),

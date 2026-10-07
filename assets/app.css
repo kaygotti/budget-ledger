@@ -283,6 +283,8 @@ summary{cursor:pointer;font-weight:600;padding:10px 0;min-height:44px}
   .filters .monthlabel{flex:1;min-width:0}
   .kpi{padding:12px}
   .kpi .val{font-size:1.45rem}
+  .tbl{font-size:.8125rem}
+  .tbl th,.tbl td{padding:6px 5px}
   .cmp{grid-template-columns:minmax(0,1fr) auto}
   .cmp .bars{grid-column:1 / -1;grid-row:2}
 }

@@ -73,11 +73,7 @@ let mode = 'loading';           // loading | cloud | local | loadfail
 let ready = false;
 let flashId = null, catTouched = false, erasing = false;
 
-function defaultSettings(){
-  const e = n => ({id:'c-' + n.toLowerCase().replace(/[^a-z]+/g,'-'), name:n, kind:'expense', budget:0});
-  const i = n => ({id:'c-' + n.toLowerCase().replace(/[^a-z]+/g,'-'), name:n, kind:'income', budget:0});
-  return {categories:[e('Housing'), e('Groceries'), e('Eating out'), e('Transportation'), e('Utilities and phone'), e('Subscriptions'), e('Business costs'), e('Fun'), e('Everything else'), i('Client work'), i('Other income')], recurring:[]};
-}
+function defaultSettings(){ return Shell.starterSettings(); }
 function normSettings(d){
   d = d || {};
   const cats = Array.isArray(d.categories) ? d.categories.filter(c => c && c.id && c.name) : [];
@@ -212,6 +208,9 @@ async function load(){
   bind(); mode = 'cloud'; ready = true; lastSync = Date.now();
   const sel = $('#aCat'); sel.textContent = ''; sel.dataset.sig = '';
   syncDate(); renderAll();
+  // An account still on the starter categories has nothing saved for them yet. Save
+  // them once, so its entries keep their category names wherever they are read.
+  if (!res.data.some(r => r.key === 'settings')) save('settings');
   if (wantCats){
     wantCats = false;
     try { history.replaceState(null, '', location.pathname); } catch (e) {}
